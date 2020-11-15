@@ -78,6 +78,29 @@ namespace Меню
                     selectedLine++;
                     SelectingString(menustrings[selectedLine - 1], menustrings[selectedLine], RIGHTINDENT, RIGHTINDENT + WIDTH, UPINDENT + selectedLine - 1, UPINDENT + selectedLine);
                 }
+
+                if (key.Key == ConsoleKey.Enter)
+                {
+                    Console.Clear();
+                    switch (selectedLine)
+                    {
+                        case 0:
+                            Console.WriteLine($"Тут оджнажды будет {menustrings[selectedLine]}");
+                            break;
+                        case 1:
+                            Console.WriteLine($"Тут оджнажды будет {menustrings[selectedLine]}");
+                            break;
+                        case 2:
+                            Console.WriteLine($"Тут оджнажды будет {menustrings[selectedLine]}");
+                            break;
+                        case 3:
+                            Environment.Exit(0);
+                            break;
+
+
+                    }
+
+                }
             }
         }
     }
