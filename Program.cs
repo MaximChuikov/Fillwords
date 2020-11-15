@@ -4,6 +4,12 @@ namespace Меню
 {
     class Program
     {
+        static void NewGame()
+        {
+            Console.WriteLine("Введите ваш никнейм");
+            string playerName = Console.ReadLine();
+            Environment.Exit(0);
+        }
         static void SelectingString(string oldStr, string newStr, int x1, int x2, int oldY, int newY)
         {
             Console.SetCursorPosition(x2, oldY);
@@ -85,7 +91,7 @@ namespace Меню
                     switch (selectedLine)
                     {
                         case 0:
-                            Console.WriteLine($"Тут оджнажды будет {menustrings[selectedLine]}");
+                            NewGame();
                             break;
                         case 1:
                             Console.WriteLine($"Тут оджнажды будет {menustrings[selectedLine]}");
