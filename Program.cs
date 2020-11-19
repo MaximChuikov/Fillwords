@@ -1,16 +1,39 @@
 ﻿using System;
+using System.IO;
 
 namespace Меню
 {
-    class Program
+    class Game
     {
-        static void NewGame()
+        private int RandomDirection()
+        {
+            Random rand = new Random();
+            return rand.Next(1,4);
+        }
+            
+        public void NewGame()
         {
             Console.WriteLine("Введите ваш никнейм");
             string playerName = Console.ReadLine();
+
+            //string[] words = File.ReadAllLines("words.txt");
+            string[] words = { "кит", "лодка", "ноутбук", "як", "конь", "знак", "телевизор", "мышь", "экран", 
+                                "клавиатура", "программа", "каркас", "окружность", "цвет", "куб", "нога" };
+
+
+            for (int i = 0; i < words.Length; i++)
+            {
+                Console.WriteLine(words[i]);
+            }
+
+
+
             Environment.Exit(0);
         }
-        static void SelectingString(string oldStr, string newStr, int x1, int x2, int oldY, int newY)
+    }
+    class Menu
+    {
+        public void SelectingString(string oldStr, string newStr, int x1, int x2, int oldY, int newY)
         {
             Console.SetCursorPosition(x2, oldY);
             for (int i = x2; i > x1; i--)
@@ -25,14 +48,16 @@ namespace Меню
             Console.BackgroundColor = ConsoleColor.Black;
 
         }
-        static void SetCursorAndWrite(string str, int x, int y)
+
+
+        public void SetCursorAndWrite(string str, int x, int y)
         {
             Console.SetCursorPosition(x, y);
             Console.Write(str);
 
         }
 
-        static void DrawFrame(int rightIndent, int upIndent, int width, int lenght)
+        public void DrawFrame(int rightIndent, int upIndent, int width, int lenght)
         {
             Console.BackgroundColor = ConsoleColor.DarkYellow;
 
@@ -49,40 +74,47 @@ namespace Меню
 
             Console.BackgroundColor = ConsoleColor.Black;
         }
+    }
+    class Program
+    {
+        
 
         static void Main()
         {
-            const int RIGHTINDENT = 2;   // отступ справа, можно менять
-            const int UPINDENT = 100;      // отступ сверху
+            const int RIGHTINDENT = 1;   // отступ справа
+            const int UPINDENT = 1;      // отступ сверху
             const int WIDTH = 10;         // ширина
             const int LENGHT = 4;         // длина
+            Menu menu = new Menu();
 
-            DrawFrame(RIGHTINDENT, UPINDENT, WIDTH, LENGHT);
+            menu.DrawFrame(RIGHTINDENT,UPINDENT,WIDTH,LENGHT);
 
             string[] menustrings = { "Новая игра", "Продолжить", "Рейтинг", "Выход" };
 
             for (int i = 0; i < menustrings.Length; i++)
             {
-                SetCursorAndWrite(menustrings[i], RIGHTINDENT, UPINDENT + i);
+                menu.SetCursorAndWrite(menustrings[i], RIGHTINDENT, UPINDENT + i);
             }
+
             int selectedLine = 0;
-            SelectingString(menustrings[selectedLine], menustrings[selectedLine], RIGHTINDENT, RIGHTINDENT + WIDTH, UPINDENT + selectedLine, UPINDENT);
+            menu.SelectingString(menustrings[selectedLine], menustrings[selectedLine], RIGHTINDENT, RIGHTINDENT + WIDTH, UPINDENT + selectedLine, UPINDENT);
             ConsoleKeyInfo key;
-            for (; ; )
+            Game game = new Game();
+            for ( ; ; )
             {
-                Console.SetCursorPosition(RIGHTINDENT - 1, UPINDENT + LENGHT + 1);
+                Console.SetCursorPosition(RIGHTINDENT-1,UPINDENT+LENGHT+1);
                 key = Console.ReadKey();
 
                 if (key.Key == ConsoleKey.W || key.Key == ConsoleKey.UpArrow && selectedLine != 0)
                 {
                     selectedLine--;
-                    SelectingString(menustrings[selectedLine + 1], menustrings[selectedLine], RIGHTINDENT, RIGHTINDENT + WIDTH, UPINDENT + selectedLine + 1, UPINDENT + selectedLine);
+                    menu.SelectingString(menustrings[selectedLine + 1], menustrings[selectedLine], RIGHTINDENT, RIGHTINDENT + WIDTH, UPINDENT + selectedLine + 1, UPINDENT + selectedLine);
                 }
 
                 if (key.Key == ConsoleKey.S || key.Key == ConsoleKey.DownArrow && selectedLine != LENGHT - 1)
                 {
                     selectedLine++;
-                    SelectingString(menustrings[selectedLine - 1], menustrings[selectedLine], RIGHTINDENT, RIGHTINDENT + WIDTH, UPINDENT + selectedLine - 1, UPINDENT + selectedLine);
+                    menu.SelectingString(menustrings[selectedLine-1],menustrings[selectedLine], RIGHTINDENT, RIGHTINDENT + WIDTH, UPINDENT + selectedLine-1, UPINDENT + selectedLine);
                 }
 
                 if (key.Key == ConsoleKey.Enter)
@@ -91,7 +123,7 @@ namespace Меню
                     switch (selectedLine)
                     {
                         case 0:
-                            NewGame();
+                            game.NewGame();
                             break;
                         case 1:
                             Console.WriteLine($"Тут оджнажды будет {menustrings[selectedLine]}");
@@ -109,5 +141,6 @@ namespace Меню
                 }
             }
         }
+        
     }
 }
