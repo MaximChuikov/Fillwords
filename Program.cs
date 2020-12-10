@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading;
@@ -7,8 +7,8 @@ namespace Меню
 {
     class Field
     {
-        public const int XLENGHT = 5;
-        public const int YLENGHT = 5;
+        public const int XLENGHT = 12;
+        public const int YLENGHT = 12;
 
         private static Random rand = new Random();
 
