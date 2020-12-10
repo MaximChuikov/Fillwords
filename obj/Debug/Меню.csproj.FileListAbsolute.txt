@@ -1,0 +1,7 @@
+C:\Users\Максим\source\repos\Меню\bin\Debug\Меню.exe.config
+C:\Users\Максим\source\repos\Меню\bin\Debug\Меню.exe
+C:\Users\Максим\source\repos\Меню\bin\Debug\Меню.pdb
+C:\Users\Максим\source\repos\Меню\obj\Debug\Меню.csprojAssemblyReference.cache
+C:\Users\Максим\source\repos\Меню\obj\Debug\Меню.csproj.CoreCompileInputs.cache
+C:\Users\Максим\source\repos\Меню\obj\Debug\Меню.exe
+C:\Users\Максим\source\repos\Меню\obj\Debug\Меню.pdb

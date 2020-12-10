@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading;
@@ -7,26 +7,22 @@ namespace Меню
 {
     class Field
     {
-        public const int XLENGHT = 6;
-        public const int YLENGHT = 6;
-        protected const int EDGENUM =(int) (XLENGHT * YLENGHT / 2.5);
+        public const int XLENGHT = 5;
+        public const int YLENGHT = 5;
+
+        private static Random rand = new Random();
+
+        protected const int EDGENUM = (int)(XLENGHT * YLENGHT / 2.5);
 
         private static char[,] field = new char[XLENGHT, YLENGHT];
 
 
-        //string[] words = File.ReadAllLines("words.txt");
-        private static List<string> words2 = new List<string> {"як", "фа"/* нота*/,"ёж", "ил", "ум", "щи", "юг", "яд" };
-        private static List<string> words3 = new List<string> { "кит", "жук", "кот", "суп", "дом", "бор", "рог", "лом", "шум", "том", "бит", "год", "газ", "зуб", "лук", "фен", "эхо", "яма" };
-        private static List<string> words4 = new List<string> { "хром", "кофе", "мышь", "круг", "лапа", "плуг", "вата", "борт", "гипс", "дань", "желе", "идол", "опыт", "пена", "урок", "фтор", "ярус" };
-        private static List<string> words5 = new List<string> { "скейт", "порог", "груда", "тыква", "крупа", "факел", "багет", "веник", "волос", "гайка", "дубль", "желоб", "лакей", "совок", "центр" };
-        private static List<string> words6 = new List<string> { "капкан", "лопата", "пророк", "кимоно", "бросок", "акация", "затвор", "колпак", "нейлон", "физика", "хозяин", "хлопец", "шерсть", "ястреб" };
-
-        
+        private static string[] words = File.ReadAllLines("dict.txt");
 
         private static bool CellIsFree(int x, int y) //свободна ли ячейка и не превышены ли края поля
         {
 
-            if (x <= XLENGHT-1 && y <= YLENGHT-1 && x >= 0 && y >= 0)
+            if (x <= XLENGHT - 1 && y <= YLENGHT - 1 && x >= 0 && y >= 0)
                 if (field[x, y] == ' ')
                     return true;
                 else
@@ -35,22 +31,9 @@ namespace Меню
                 return false;
 
         }
-        private static int Random(int min, int max)
-        {
-            Random rand = new Random();
-            try
-            {
-                return rand.Next(min, max);
-            }
-            catch
-            {
-                return min;
-            }
-        }
 
         public static char[,] FillField()
         {
-            Console.Clear();
             List<string> fieldWords = new List<string>();
             ClearArray(field);
             int x = 0;
@@ -59,7 +42,7 @@ namespace Меню
             bool stop = false;
             int cell = XLENGHT * YLENGHT;
             bool nextFor;
-
+            Console.WriteLine("Идёт создание филвордов...");
             for (; ; )
             {
                 stop = false;
@@ -67,7 +50,7 @@ namespace Меню
 
                 if (cell > EDGENUM)
                 {
-                    currentWord = GetWord(Random(3, 7), fieldWords);
+                    currentWord = GetWord(rand.Next(3, 11), fieldWords);
                 }
                 else
                 {
@@ -122,8 +105,8 @@ namespace Меню
                 {
                     do
                     {
-                        x = Random(0, XLENGHT);
-                        y = Random(0, YLENGHT);
+                        x = rand.Next(0, XLENGHT);
+                        y = rand.Next(0, YLENGHT);
                     } while (!CellIsFree(x, y));
                 }
                 fieldWords.Add(currentWord);
@@ -138,7 +121,7 @@ namespace Меню
                         stop = false;
                         while (!stop)
                         {
-                            switch (Random(1, 5))
+                            switch (rand.Next(1, 5))
                             {
                                 case 1:
                                     stop = CellIsFree(x + 1, y);
@@ -195,12 +178,12 @@ namespace Меню
         }
         public static List<string> fieldWords1 = new List<string>();
 
-        private static bool TwoPointsAroundIsFree (int x, int y)
+        private static bool TwoPointsAroundIsFree(int x, int y)
         {
             if (CellIsFree(x + 1, y))
             {//иду вправо
                 if (CellIsFree(x + 1, y + 1))
-                        return true;
+                    return true;
                 else if (CellIsFree(x + 2, y))
                 {//иду вправо-вправо
                     return true;
@@ -455,7 +438,7 @@ namespace Меню
             return false;
         }
 
-        private static char[,] ClearArray (char[,] field)
+        private static char[,] ClearArray(char[,] field)
         {
             for (int i = 0; i < XLENGHT; i++)
             {
@@ -467,109 +450,283 @@ namespace Меню
 
             return field;
         }
-        private static string GetWord(int lenght, List<string>fieldWords)
+        private static string GetWord(int lenght, List<string> fieldWords)
         {
             string currentWord = null;
-            int num;
-            switch (lenght)
+            do
             {
-                case 2:
-                    do
-                    {
-                        num = Random(0, words2.Count);
-                        currentWord = words2[num];
-                    }
-                    while (fieldWords.Contains(currentWord));
-                    break;
-                case 3:
-                    do
-                    {
-                        num = Random(0, words3.Count);
-                        currentWord = words3[num];
-                    }
-                    while (fieldWords.Contains(currentWord));
-                    break;
-                case 4:
-                    do
-                    {
-                        num = Random(0, words4.Count);
-                        currentWord = words4[num];
-                    }
-                    while (fieldWords.Contains(currentWord));
-                    break;
-                case 5:
-                    do
-                    {
-                        num = Random(0, words5.Count);
-                        currentWord = words5[num];
-                    }
-                    while (fieldWords.Contains(currentWord));
-                    break;
-                case 6:
-                    do
-                    {
-                        num = Random(0, words6.Count);
-                        currentWord = words6[num];
-                    }
-                    while (fieldWords.Contains(currentWord));
-                    break;
-            }
+                currentWord = words[rand.Next(0, words.Length)];
+            } while (fieldWords.Contains(currentWord) || currentWord.Length != lenght);
             return currentWord;
         }
     }
     class Game
-    {   
+    {
+        static char[,] field = Field.FillField();
         public static void NewGame()
         {
+            Console.Clear();
             Console.WriteLine("Введите ваш никнейм");
             string playerName = Console.ReadLine();
             Console.Clear();
             Console.Write("Идёт создание карты филвордов...");
-            char[,] field = Field.FillField();
             Console.Clear();
 
             for (int i = 0; i < Field.XLENGHT; i++)
             {
                 for (int j = 0; j < Field.YLENGHT; j++)
                 {
-                    Console.Write(field[i, j]);
+                    Console.SetCursorPosition(i,j);
+                    Console.Write(field[i,j]);
                 }
-                Console.WriteLine();
             }
 
-            Console.ReadKey();
+            for (int i = 0; i < Field.fieldWords1.Count; i++)
+            {
+                Console.SetCursorPosition(0, i + Field.YLENGHT + 1);
+                Console.Write(Field.fieldWords1[i]);
+            }
 
 
-            
+            Console.SetCursorPosition(0, 0);
 
-
-
-            Environment.Exit(0);
-        }
-
-        private bool KeyReader(char[,] field)
-        {
             ConsoleKeyInfo key;
+            int x = 0;
+            int y = 0;
+            string currentWord = null;
+            char[,] quessedWords = new char[Field.XLENGHT, Field.YLENGHT];
+            int numOfQuessedWords = 0;
+            bool stopFor = false;
+
+
+
+
+            char[,] thisTry = new char[Field.XLENGHT, Field.YLENGHT];
+            bool enter = false;
+
 
             for (; ; )
             {
+                if (stopFor)
+                {
+                    Console.SetCursorPosition(Field.XLENGHT + 1, 0);
+                    Console.Write("Правильно!");
+                    break;
+                }
+
+                Console.SetCursorPosition(x, y);
                 key = Console.ReadKey();
+
+                if(quessedWords[x,y] != '*' && !enter)
+                    PrintingColoredChar(x, y, "black");
+                else if (enter)
+                    PrintingColoredChar(x, y, "red");
+                else if (quessedWords[x,y] == '*')
+                    PrintingColoredChar(x, y, "green");
+
+
                 switch (key.Key)
                 {
                     case ConsoleKey.UpArrow:
+                        if (IsEnterInFieldArea(x, y - 1) && thisTry[x, y - 1] != '*')
+                        {
+                            if (!enter)
+                            {
+                                //PrintingColoredChar(x, y, "black");
+                                PrintingColoredChar(x, y - 1, "blue");
+                                y--;
+                            }
 
+                            if(enter && quessedWords[x, y - 1] != '*')
+                            {
+                                y -= 1;
+                                currentWord += field[x, y];
+                                thisTry[x, y] = '*';
+                                PrintingColoredChar(x, y, "red");
+                            }
+
+                        }
+                        else
+                        {
+                            PrintingColoredChar(x, y, "blue");
+                        }
                         break;
-                        break;
+
                     case ConsoleKey.DownArrow:
+                        if (IsEnterInFieldArea(x, y + 1) && thisTry[x, y + 1] != '*')
+                        {
+                            if (!enter)
+                            {
+                                //PrintingColoredChar(x, y, "black");
+                                PrintingColoredChar(x, y + 1, "blue");
+                                y++;
+                            }
 
+                            if (enter && quessedWords[x, y + 1] != '*')
+                            {
+                                y += 1;
+                                currentWord += field[x, y];
+                                thisTry[x, y] = '*';
+                                PrintingColoredChar(x, y, "red");
+                            }
+
+                        }
+                        else
+                        {
+                            PrintingColoredChar(x, y, "blue");
+                        }
                         break;
+
                     case ConsoleKey.LeftArrow:
+                        if (IsEnterInFieldArea(x - 1, y) && thisTry[x - 1, y] != '*')
+                        {
+                            if (!enter)
+                            {
+                                //PrintingColoredChar(x, y, "black");
+                                PrintingColoredChar(x - 1, y, "blue");
+                                x--;
+                            }
 
+                            if (enter && quessedWords[x - 1, y] != '*')
+                            {
+                                x -= 1;
+                                currentWord += field[x, y];
+                                thisTry[x, y] = '*';
+                                PrintingColoredChar(x, y, "red");
+                            }
+
+                        }
+                        else
+                        {
+                            PrintingColoredChar(x, y, "blue");
+                        }
                         break;
+
                     case ConsoleKey.RightArrow:
+                        if (IsEnterInFieldArea(x + 1, y) && thisTry[x + 1, y] != '*')
+                        {
+                            if (!enter)
+                            {
+                                //PrintingColoredChar(x, y, "black");
+                                PrintingColoredChar(x + 1, y, "blue");
+                                x++;
+                            }
+
+                            if (enter && quessedWords[x + 1, y] != '*')
+                            {
+                                x += 1;
+                                currentWord += field[x, y];
+                                thisTry[x, y] = '*';
+                                PrintingColoredChar(x, y, "red");
+                            }
+
+                        }
+                        else
+                        {
+                            PrintingColoredChar(x, y, "blue");
+                        }
+                        break;
+
+                    case ConsoleKey.Enter:
+                        if (!enter)
+                        {
+                            thisTry = ClearArray();
+                            currentWord = null;
+                            PrintingColoredChar(x, y, "red");
+                            currentWord += field[x, y];
+                            thisTry[x, y] = '*';
+                        }
+                        else
+                        {
+                            if (Field.fieldWords1.Contains(currentWord))
+                            {
+                                numOfQuessedWords++;
+                                if (numOfQuessedWords == Field.fieldWords1.Count)
+                                    stopFor = true;
+
+                                for (int i = 0; i < Field.XLENGHT; i++)
+                                {
+                                    for (int j = 0; j < Field.YLENGHT; j++)
+                                    {
+                                        if (thisTry[i, j] == '*')
+                                            quessedWords[i, j] = '*';
+                                    }
+                                }
+                            }
+
+
+                            for (int i = 0; i < Field.XLENGHT; i++)
+                            {
+                                for (int j = 0; j < Field.YLENGHT; j++)
+                                {
+                                    if (quessedWords[i, j] == '*')
+                                    {
+                                        PrintingColoredChar(i, j, "green");
+                                    }
+                                    else
+                                        PrintingColoredChar(i, j, "black");
+                                }
+                            }
+
+                            currentWord = "";
+                            thisTry = ClearArray();
+                        }
+                        enter = !enter;
+                        break;
+
+                    default:
+                        PrintingColoredChar(x, y, "black");
                         break;
                 }
             }
+
+
+
+            Console.ReadKey();
+            Console.Clear();
+            Program.Main();
+        }
+
+        private static void PrintingColoredChar(int x, int y, string color)
+        {
+            switch(color)
+            {
+                case "red":
+                    Console.BackgroundColor = ConsoleColor.Red;
+                    break;
+                case "green":
+                    Console.BackgroundColor = ConsoleColor.DarkGreen;
+                    break;
+                case "blue":
+                    Console.BackgroundColor = ConsoleColor.Blue;
+                    break;
+                case "black":
+                    Console.BackgroundColor = ConsoleColor.Black;
+                    break;
+            }
+            Console.SetCursorPosition(x, y);
+            Console.Write(field[x, y]);
+            Console.BackgroundColor = ConsoleColor.Black;
+        }
+
+        static char [,] ClearArray ()
+        {
+            char[,] array = new char[Field.XLENGHT, Field.YLENGHT];
+
+            for (int i = 0; i < Field.XLENGHT; i++)
+            {
+                for (int j = 0; j < Field.YLENGHT; j++)
+                {
+                    array[i, j] = '_';
+                }
+            }
+
+            return array;
+        }
+
+        private static bool IsEnterInFieldArea(int x1, int y1)
+        {
+            return (x1 >= 0 && y1 >= 0 && x1 < Field.XLENGHT && y1 < Field.YLENGHT);
         }
     }
     class Menu
@@ -618,16 +775,16 @@ namespace Меню
     }
     class Program
     {
-        
 
-        static void Main()
+
+        public static void Main()
         {
-            const int RIGHTINDENT = 1;   // отступ справа
-            const int UPINDENT = 1;      // отступ сверху
+            const int RIGHTINDENT = 5;   // отступ справа
+            const int UPINDENT = 5;      // отступ сверху
             const int WIDTH = 10;         // ширина
             const int LENGHT = 4;         // длина
 
-            Menu.DrawFrame(RIGHTINDENT,UPINDENT,WIDTH,LENGHT);
+            Menu.DrawFrame(RIGHTINDENT, UPINDENT, WIDTH, LENGHT);
 
             string[] menustrings = { "Новая игра", "Продолжить", "Рейтинг", "Выход" };
 
@@ -639,9 +796,9 @@ namespace Меню
             int selectedLine = 0;
             Menu.SelectingString(menustrings[selectedLine], menustrings[selectedLine], RIGHTINDENT, RIGHTINDENT + WIDTH, UPINDENT + selectedLine, UPINDENT);
             ConsoleKeyInfo key;
-            for ( ; ; )
+            for (; ; )
             {
-                Console.SetCursorPosition(RIGHTINDENT-1,UPINDENT+LENGHT+1);
+                Console.SetCursorPosition(RIGHTINDENT - 1, UPINDENT + LENGHT + 1);
                 key = Console.ReadKey();
 
                 if (key.Key == ConsoleKey.W || key.Key == ConsoleKey.UpArrow && selectedLine != 0)
@@ -653,7 +810,7 @@ namespace Меню
                 if (key.Key == ConsoleKey.S || key.Key == ConsoleKey.DownArrow && selectedLine != LENGHT - 1)
                 {
                     selectedLine++;
-                    Menu.SelectingString(menustrings[selectedLine-1],menustrings[selectedLine], RIGHTINDENT, RIGHTINDENT + WIDTH, UPINDENT + selectedLine-1, UPINDENT + selectedLine);
+                    Menu.SelectingString(menustrings[selectedLine - 1], menustrings[selectedLine], RIGHTINDENT, RIGHTINDENT + WIDTH, UPINDENT + selectedLine - 1, UPINDENT + selectedLine);
                 }
 
                 if (key.Key == ConsoleKey.Enter)
@@ -680,6 +837,7 @@ namespace Меню
                 }
             }
         }
-        
+
     }
 }
+
