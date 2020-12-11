@@ -1,28 +1,30 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Threading;
+using System.Text;
 
 namespace Меню
 {
     class Field
     {
-        public const int XLENGHT = 12;
-        public const int YLENGHT = 12;
+        public static int lvl;
+        public static int xLenght;
+        public static int yLenght;
 
         private static Random rand = new Random();
 
-        protected const int EDGENUM = (int)(XLENGHT * YLENGHT / 2.5);
+        protected static int EDGENUM;
 
-        private static char[,] field = new char[XLENGHT, YLENGHT];
-
+        private static char[,] field;
+        private static int[,] numField;
 
         private static string[] words = File.ReadAllLines("dict.txt");
 
         private static bool CellIsFree(int x, int y) //свободна ли ячейка и не превышены ли края поля
         {
 
-            if (x <= XLENGHT - 1 && y <= YLENGHT - 1 && x >= 0 && y >= 0)
+            if (x <= xLenght - 1 && y <= yLenght - 1 && x >= 0 && y >= 0)
                 if (field[x, y] == ' ')
                     return true;
                 else
@@ -34,15 +36,25 @@ namespace Меню
 
         public static char[,] FillField()
         {
+            xLenght = lvl / 2 + lvl % 2;
+            yLenght = lvl / 2;
+            EDGENUM = (int)(xLenght * yLenght / 2.5);
+            field = new char[xLenght, yLenght];
+
+            numField = new int[xLenght, yLenght];
+
             List<string> fieldWords = new List<string>();
-            ClearArray(field);
+            ClearFieldArray(field);
             int x = 0;
             int y = 0;
             string currentWord = "";
             bool stop = false;
-            int cell = XLENGHT * YLENGHT;
+            int cell = xLenght * yLenght;
             bool nextFor;
-            Console.WriteLine("Идёт создание филвордов...");
+
+            int step = 0;
+
+
             for (; ; )
             {
                 stop = false;
@@ -54,12 +66,12 @@ namespace Меню
                 }
                 else
                 {
-                    for (int i = 0; i < XLENGHT; i++)
+                    for (int i = 0; i < xLenght; i++)
                     {
                         if (stop)
                             break;
 
-                        for (int j = 0; j < YLENGHT; j++)
+                        for (int j = 0; j < yLenght; j++)
                         {
                             if (CellIsFree(i, j))
                             {
@@ -85,8 +97,9 @@ namespace Меню
                                 }
                                 else
                                 {
-                                    ClearArray(field);
-                                    //Console.Clear();
+                                    ClearFieldArray(field);
+                                    ClearNumArray();
+                                    step = 0;
                                     fieldWords.Clear();
                                     nextFor = true;
                                     stop = true;
@@ -105,14 +118,16 @@ namespace Меню
                 {
                     do
                     {
-                        x = rand.Next(0, XLENGHT);
-                        y = rand.Next(0, YLENGHT);
+                        x = rand.Next(0, xLenght);
+                        y = rand.Next(0, yLenght);
                     } while (!CellIsFree(x, y));
                 }
                 fieldWords.Add(currentWord);
                 field[x, y] = currentWord[0];
-                //Console.SetCursorPosition(x, y);
-                //Console.Write(field[x, y]);
+
+                step++;
+                numField[x, y] = step;
+                
 
                 for (int i = 1; i < currentWord.Length; i++)
                 {
@@ -148,22 +163,23 @@ namespace Меню
                         }
                         stop = false;
                         field[x, y] = currentWord[i];
-                        //Console.SetCursorPosition(x, y);
-                        //Console.Write(field[x, y]);
+                        numField[x, y] = step;
                     }
                     else
                     {
-                        ClearArray(field);
-                        //Console.Clear();
+                        ClearFieldArray(field);
+                        ClearNumArray();
+                        step = 0;
                         fieldWords.Clear();
                         break;
                     }
 
                 }
+
                 cell = 0;
-                for (int i = 0; i < XLENGHT; i++)
+                for (int i = 0; i < xLenght; i++)
                 {
-                    for (int j = 0; j < YLENGHT; j++)
+                    for (int j = 0; j < yLenght; j++)
                     {
                         if (field[i, j] == ' ')
                             cell++;
@@ -174,10 +190,11 @@ namespace Меню
                     break;
             }
             fieldWords1 = fieldWords;
+            numField1 = numField;
             return Field.field;
         }
         public static List<string> fieldWords1 = new List<string>();
-
+        public static int[,] numField1; 
         private static bool TwoPointsAroundIsFree(int x, int y)
         {
             if (CellIsFree(x + 1, y))
@@ -438,11 +455,11 @@ namespace Меню
             return false;
         }
 
-        private static char[,] ClearArray(char[,] field)
+        private static char[,] ClearFieldArray(char[,] field)
         {
-            for (int i = 0; i < XLENGHT; i++)
+            for (int i = 0; i < xLenght; i++)
             {
-                for (int j = 0; j < YLENGHT; j++)
+                for (int j = 0; j < yLenght; j++)
                 {
                     field[i, j] = ' ';
                 }
@@ -450,6 +467,20 @@ namespace Меню
 
             return field;
         }
+
+        private static char[,] ClearNumArray()
+        {
+            for (int i = 0; i < xLenght; i++)
+            {
+                for (int j = 0; j < yLenght; j++)
+                {
+                    numField[i, j] = 0;
+                }
+            }
+
+            return field;
+        }
+
         private static string GetWord(int lenght, List<string> fieldWords)
         {
             string currentWord = null;
@@ -462,19 +493,45 @@ namespace Меню
     }
     class Game
     {
-        static char[,] field = Field.FillField();
+        static char[,] field;
+
+        private static int ReadLvl()
+        {
+            int lvl;
+            string str;
+            bool complete = false;
+            do
+            {
+                str = Console.ReadLine();
+                if(Int32.TryParse(str, out lvl))
+                {
+                    complete = lvl >= 5 && lvl <= 28;
+                }
+                
+            } while (!complete);
+            Console.Clear();
+            return lvl;
+        }
         public static void NewGame()
         {
             Console.Clear();
             Console.WriteLine("Введите ваш никнейм");
             string playerName = Console.ReadLine();
             Console.Clear();
-            Console.Write("Идёт создание карты филвордов...");
+
+            Console.WriteLine("Введите уровень от 5 до 28");
+
+            Field.lvl = ReadLvl();
             Console.Clear();
 
-            for (int i = 0; i < Field.XLENGHT; i++)
+            Console.Write("Идёт создание карты филвордов...");
+
+            field = Field.FillField();
+            Console.Clear();
+
+            for (int i = 0; i < Field.xLenght; i++)
             {
-                for (int j = 0; j < Field.YLENGHT; j++)
+                for (int j = 0; j < Field.yLenght; j++)
                 {
                     Console.SetCursorPosition(i,j);
                     Console.Write(field[i,j]);
@@ -483,7 +540,7 @@ namespace Меню
 
             for (int i = 0; i < Field.fieldWords1.Count; i++)
             {
-                Console.SetCursorPosition(0, i + Field.YLENGHT + 1);
+                Console.SetCursorPosition(0, i + Field.yLenght + 1);
                 Console.Write(Field.fieldWords1[i]);
             }
 
@@ -494,14 +551,15 @@ namespace Меню
             int x = 0;
             int y = 0;
             string currentWord = null;
-            char[,] quessedWords = new char[Field.XLENGHT, Field.YLENGHT];
+            char[,] quessedWords = new char[Field.xLenght, Field.yLenght];
             int numOfQuessedWords = 0;
             bool stopFor = false;
 
+            bool wordIsQuessed = true;
+            int firstLetter = 0;
 
 
-
-            char[,] thisTry = new char[Field.XLENGHT, Field.YLENGHT];
+            char[,] thisTry = new char[Field.xLenght, Field.yLenght];
             bool enter = false;
 
 
@@ -509,8 +567,29 @@ namespace Меню
             {
                 if (stopFor)
                 {
-                    Console.SetCursorPosition(Field.XLENGHT + 1, 0);
+                    Console.SetCursorPosition(Field.xLenght + 1, 0);
                     Console.Write("Правильно!");
+
+                    Records.Read();
+                    if (Records.names.Contains(playerName))
+                    {
+                        for (int i = 0; i < Records.names.Count; i++)
+                        {
+                            if (Records.names[i] == playerName)
+                            {
+                                Records.points[i] += Field.xLenght * Field.yLenght;
+                                break;
+                            }
+                                
+
+                        } 
+                    }
+                    else
+                    {
+                        Records.names.Add(playerName);
+                        Records.points.Add(Field.xLenght * Field.yLenght);
+                    }
+                    Records.WriteInFile();
                     break;
                 }
 
@@ -532,7 +611,6 @@ namespace Меню
                         {
                             if (!enter)
                             {
-                                //PrintingColoredChar(x, y, "black");
                                 PrintingColoredChar(x, y - 1, "blue");
                                 y--;
                             }
@@ -543,6 +621,8 @@ namespace Меню
                                 currentWord += field[x, y];
                                 thisTry[x, y] = '*';
                                 PrintingColoredChar(x, y, "red");
+                                if (firstLetter != Field.numField1[x, y])
+                                    wordIsQuessed = false;
                             }
 
                         }
@@ -557,7 +637,6 @@ namespace Меню
                         {
                             if (!enter)
                             {
-                                //PrintingColoredChar(x, y, "black");
                                 PrintingColoredChar(x, y + 1, "blue");
                                 y++;
                             }
@@ -568,6 +647,8 @@ namespace Меню
                                 currentWord += field[x, y];
                                 thisTry[x, y] = '*';
                                 PrintingColoredChar(x, y, "red");
+                                if (firstLetter != Field.numField1[x, y])
+                                    wordIsQuessed = false;
                             }
 
                         }
@@ -582,7 +663,6 @@ namespace Меню
                         {
                             if (!enter)
                             {
-                                //PrintingColoredChar(x, y, "black");
                                 PrintingColoredChar(x - 1, y, "blue");
                                 x--;
                             }
@@ -593,6 +673,8 @@ namespace Меню
                                 currentWord += field[x, y];
                                 thisTry[x, y] = '*';
                                 PrintingColoredChar(x, y, "red");
+                                if (firstLetter != Field.numField1[x, y])
+                                    wordIsQuessed = false;
                             }
 
                         }
@@ -607,7 +689,6 @@ namespace Меню
                         {
                             if (!enter)
                             {
-                                //PrintingColoredChar(x, y, "black");
                                 PrintingColoredChar(x + 1, y, "blue");
                                 x++;
                             }
@@ -618,6 +699,9 @@ namespace Меню
                                 currentWord += field[x, y];
                                 thisTry[x, y] = '*';
                                 PrintingColoredChar(x, y, "red");
+
+                                if (firstLetter != Field.numField1[x, y])
+                                    wordIsQuessed = false;
                             }
 
                         }
@@ -635,18 +719,20 @@ namespace Меню
                             PrintingColoredChar(x, y, "red");
                             currentWord += field[x, y];
                             thisTry[x, y] = '*';
+                            wordIsQuessed = true;
+                            firstLetter = Field.numField1[x, y];
                         }
                         else
                         {
-                            if (Field.fieldWords1.Contains(currentWord))
+                            if (Field.fieldWords1.Contains(currentWord) && wordIsQuessed)
                             {
                                 numOfQuessedWords++;
                                 if (numOfQuessedWords == Field.fieldWords1.Count)
                                     stopFor = true;
 
-                                for (int i = 0; i < Field.XLENGHT; i++)
+                                for (int i = 0; i < Field.xLenght; i++)
                                 {
-                                    for (int j = 0; j < Field.YLENGHT; j++)
+                                    for (int j = 0; j < Field.yLenght; j++)
                                     {
                                         if (thisTry[i, j] == '*')
                                             quessedWords[i, j] = '*';
@@ -655,9 +741,9 @@ namespace Меню
                             }
 
 
-                            for (int i = 0; i < Field.XLENGHT; i++)
+                            for (int i = 0; i < Field.xLenght; i++)
                             {
-                                for (int j = 0; j < Field.YLENGHT; j++)
+                                for (int j = 0; j < Field.yLenght; j++)
                                 {
                                     if (quessedWords[i, j] == '*')
                                     {
@@ -711,11 +797,11 @@ namespace Меню
 
         static char [,] ClearArray ()
         {
-            char[,] array = new char[Field.XLENGHT, Field.YLENGHT];
+            char[,] array = new char[Field.xLenght, Field.yLenght];
 
-            for (int i = 0; i < Field.XLENGHT; i++)
+            for (int i = 0; i < Field.xLenght; i++)
             {
-                for (int j = 0; j < Field.YLENGHT; j++)
+                for (int j = 0; j < Field.yLenght; j++)
                 {
                     array[i, j] = '_';
                 }
@@ -726,9 +812,96 @@ namespace Меню
 
         private static bool IsEnterInFieldArea(int x1, int y1)
         {
-            return (x1 >= 0 && y1 >= 0 && x1 < Field.XLENGHT && y1 < Field.YLENGHT);
+            return (x1 >= 0 && y1 >= 0 && x1 < Field.xLenght && y1 < Field.yLenght);
         }
     }
+
+    class Records
+    {
+        private static string path = Environment.CurrentDirectory + "/records.txt";
+
+        public static List<string> names = new List<string>();
+        public static List<int> points = new List<int>();
+
+        public static void Read()
+        {
+            if (!File.Exists(path))
+            {
+                File.Create(path);
+            }
+            
+
+            
+            
+                names.Clear();
+                points.Clear();
+
+                string str;
+
+                string[] file = File.ReadAllLines(path, Encoding.GetEncoding(1251));
+
+
+
+                int i = 0;
+            if (file.Length != 0)
+            {
+                do
+                {
+                    str = file[i];
+                    if (str != "")
+                        names.Add(str);
+                    i++;
+                } while (str != "");
+
+                int point;
+                do
+                {
+                    try
+                    {
+                        point = Int32.Parse(file[i]);
+                    }
+                    catch
+                    {
+                        point = 0;
+                    }
+                    points.Add(point);
+                    i++;
+                } while (i < file.Length);
+            }
+            
+            
+            
+        }
+
+        public static void ReadAndPrint()
+        {
+            Records.Read();
+            for (int i = 0; i < names.Count; i++)
+            {
+                Console.Write(names[i] + " ");
+                Console.WriteLine(points[i]);
+            }
+        }
+
+        public static void WriteInFile()
+        {
+            string[] toWrite = new string [Records.names.Count + 1 + Records.points.Count];
+            for (int i = 0; i < Records.names.Count; i++)
+            {
+                toWrite[i] = Records.names[i];
+            }
+
+            toWrite[Records.names.Count] = "";
+
+            for (int i = 0; i < Records.points.Count; i++)
+            {
+                toWrite[Records.names.Count + 1 + i] = Records.points[i].ToString();
+            }
+            File.WriteAllLines(path, toWrite, Encoding.GetEncoding(1251));
+        }
+    }
+
+
     class Menu
     {
         static public void SelectingString(string oldStr, string newStr, int x1, int x2, int oldY, int newY)
@@ -825,7 +998,10 @@ namespace Меню
                             Console.WriteLine($"Тут оджнажды будет {menustrings[selectedLine]}");
                             break;
                         case 2:
-                            Console.WriteLine($"Тут оджнажды будет {menustrings[selectedLine]}");
+                            Records.ReadAndPrint();
+                            Console.ReadKey();
+                            Console.Clear();
+                            Program.Main();
                             break;
                         case 3:
                             Environment.Exit(0);
