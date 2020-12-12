@@ -599,7 +599,8 @@ namespace Меню
                 {
                     Console.SetCursorPosition(Field.xLenght + 1, 0);
                     Console.Write("Правильно!");
-                    File.Delete(Environment.CurrentDirectory + "/continue.txt");
+                    if (File.Exists(Environment.CurrentDirectory + "/continue.txt"))
+                        File.Delete(Environment.CurrentDirectory + "/continue.txt");
                     Records.Read();
                     if (Records.names.Contains(playerName))
                     {
