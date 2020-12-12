@@ -599,8 +599,7 @@ namespace Меню
                 {
                     Console.SetCursorPosition(Field.xLenght + 1, 0);
                     Console.Write("Правильно!");
-                    if (File.Exists(Environment.CurrentDirectory + "/continue.txt"))
-                        File.Delete(Environment.CurrentDirectory + "/continue.txt");
+                    Continue.DeleteFile();
                     Records.Read();
                     if (Records.names.Contains(playerName))
                     {
@@ -855,7 +854,11 @@ namespace Меню
     class Continue
     {
         private static string path = Environment.CurrentDirectory + "/continue.txt";
-
+        public static void DeleteFile()
+        {
+            if (File.Exists(path))
+                File.Delete(path);
+        }
         public static void ContinueGame()
         {
             if (!File.Exists(path))
@@ -1172,8 +1175,9 @@ namespace Меню
                     switch (selectedLine)
                     {
                         case 0:
+                            Continue.DeleteFile();
                             Game.NewGame();
-                            File.Delete(Environment.CurrentDirectory +"/records.txt");
+                            
                             break;
                         case 1:
                             Continue.ContinueGame();
