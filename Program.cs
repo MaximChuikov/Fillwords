@@ -493,7 +493,11 @@ namespace Меню
     }
     class Game
     {
-        static char[,] field;
+        public static char[,] field;
+        public static string playerName;
+        public static bool gameContinue = false;
+        public static char[,] quessedWords;
+        public static int numOfQuessedWords = 0;
 
         private static int ReadLvl()
         {
@@ -515,30 +519,56 @@ namespace Меню
         public static void NewGame()
         {
             Console.Clear();
-            Console.WriteLine("Введите ваш никнейм");
-            string playerName = Console.ReadLine();
-            Console.Clear();
 
-            Console.WriteLine("Введите уровень от 5 до 28");
-
-            Field.lvl = ReadLvl();
-            Console.Clear();
-
-            Console.Write("Идёт создание карты филвордов...");
-
-            field = Field.FillField();
-            Console.Clear();
-
-            for (int i = 0; i < Field.xLenght; i++)
+            if(!gameContinue)
             {
-                for (int j = 0; j < Field.yLenght; j++)
-                {
-                    Console.SetCursorPosition(i,j);
-                    Console.Write(field[i,j]);
-                }
-            }
+                Console.WriteLine("Введите ваш никнейм");
+                playerName = Console.ReadLine().Trim(' ');
+                Console.Clear();
 
-            for (int i = 0; i < Field.fieldWords1.Count; i++)
+                Console.WriteLine("Введите уровень от 5 до 28");
+
+                Field.lvl = ReadLvl();
+                Console.Clear();
+
+                Console.Write("Идёт создание карты филвордов...");
+
+                field = Field.FillField();
+                Console.Clear();
+
+                quessedWords = new char[Field.xLenght, Field.yLenght];
+                numOfQuessedWords = 0;
+
+                for (int i = 0; i < Field.xLenght; i++)
+                {
+                    for (int j = 0; j < Field.yLenght; j++)
+                    {
+                        Console.SetCursorPosition(i, j);
+                        Console.Write(field[i, j]);
+                    }
+                }
+
+            }
+            else
+            {
+                for (int i = 0; i < Field.xLenght; i++)
+                {
+                    for (int j = 0; j < Field.yLenght; j++)
+                    {
+                        if (quessedWords[i, j] == '*')
+                        {
+                            PrintingColoredChar(i, j, "green");
+                        }
+                        else
+                            PrintingColoredChar(i, j, "black");
+                    }
+                }
+                gameContinue = false;
+            }
+            
+            
+
+            for (int i = 0; i < 1; i++)
             {
                 Console.SetCursorPosition(0, i + Field.yLenght + 1);
                 Console.Write(Field.fieldWords1[i]);
@@ -551,8 +581,8 @@ namespace Меню
             int x = 0;
             int y = 0;
             string currentWord = null;
-            char[,] quessedWords = new char[Field.xLenght, Field.yLenght];
-            int numOfQuessedWords = 0;
+
+            
             bool stopFor = false;
 
             bool wordIsQuessed = true;
@@ -569,7 +599,7 @@ namespace Меню
                 {
                     Console.SetCursorPosition(Field.xLenght + 1, 0);
                     Console.Write("Правильно!");
-
+                    File.Delete(Environment.CurrentDirectory + "/continue.txt");
                     Records.Read();
                     if (Records.names.Contains(playerName))
                     {
@@ -727,7 +757,7 @@ namespace Меню
                             if (Field.fieldWords1.Contains(currentWord) && wordIsQuessed)
                             {
                                 numOfQuessedWords++;
-                                if (numOfQuessedWords == Field.fieldWords1.Count)
+                                if (numOfQuessedWords >= Field.fieldWords1.Count)
                                     stopFor = true;
 
                                 for (int i = 0; i < Field.xLenght; i++)
@@ -758,6 +788,12 @@ namespace Меню
                             thisTry = ClearArray();
                         }
                         enter = !enter;
+                        break;
+
+                    case ConsoleKey.S:
+                        Continue.SaveGame();
+                        Console.Clear();
+                        Program.Main();
                         break;
 
                     default:
@@ -815,7 +851,144 @@ namespace Меню
             return (x1 >= 0 && y1 >= 0 && x1 < Field.xLenght && y1 < Field.yLenght);
         }
     }
+    class Continue
+    {
+        private static string path = Environment.CurrentDirectory + "/continue.txt";
 
+        public static void ContinueGame()
+        {
+            if (!File.Exists(path))
+            {
+                Console.WriteLine("Вы не сохраняли игру");
+                Console.ReadKey();
+                Console.Clear();
+                Program.Main();
+            }
+            else
+            {
+                Game.gameContinue = true;
+
+                List<string> file = new List<string>();
+                string line;
+                using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var textReader = new StreamReader(fileStream, Encoding.GetEncoding(1251), false))
+                {
+                    do
+                    {
+                        line = textReader.ReadLine();
+                        if (line != null)
+                        {
+                            file.Add(line);
+                        }
+                    } while (line != null);
+                }
+                //заполнение необходимых данных для работы
+                Field.xLenght = Int32.Parse(file[0]);
+                Field.yLenght = Int32.Parse(file[1]);
+
+                string[] words = file[2].Trim(' ').Split(' ');
+
+                string charField = file[3];
+                string[] numField = file[4].Split(' ');
+                string charQussedWords = file[5];
+                Game.playerName = file[6];
+                Game.numOfQuessedWords = Int32.Parse(file[7]);
+                //
+                
+                
+                char[,] copyChar = new char[Field.xLenght, Field.yLenght];
+                for (int i = 0; i < charQussedWords.Length; i++)
+                {
+                    copyChar[i / Field.xLenght, i % Field.xLenght] = charField[i];
+                }
+                Game.field = copyChar;
+
+                char[,] copyQuessed = new char[Field.xLenght, Field.yLenght];
+                for (int i = 0; i < charQussedWords.Length; i++)
+                {
+                    copyQuessed[i / Field.xLenght, i % Field.xLenght] = charQussedWords[i];
+                }
+                Game.quessedWords = copyQuessed;
+
+                for (int i = 0; i < words.Length; i++)
+                {
+                    Field.fieldWords1.Add(words[i]);
+                }
+
+                int[,] numArray = new int[Field.xLenght, Field.yLenght];
+                for (int i = 0; i < charQussedWords.Length; i++)
+                {
+                    numArray[i / Field.xLenght, i % Field.xLenght] = Int32.Parse(numField[i]);
+                }
+                Field.numField1 = numArray;
+
+                Game.NewGame();
+            }
+
+        }
+
+        
+
+        public static void SaveGame()
+        {
+            using (var fileStream1 = new FileStream(path, FileMode.Create));
+
+            string[] toWrite = new string[8];
+
+            toWrite[0] = Field.xLenght.ToString();
+            toWrite[1] = Field.yLenght.ToString();
+
+            string line = "";
+
+            for (int i = 0; i < Field.fieldWords1.Count; i++)
+            {
+                line += Field.fieldWords1[i] + " ";
+            }
+            toWrite[2] = line;
+
+            line = "";
+
+            for (int i = 0; i < Field.xLenght; i++)
+            {
+                for (int j = 0; j < Field.yLenght; j++)
+                {
+                    line += Game.field[i, j];
+                }
+            }
+            toWrite[3] = line;
+
+            line = "";
+
+            for (int i = 0; i < Field.xLenght; i++)
+            {
+                for (int j = 0; j < Field.yLenght; j++)
+                {
+                    line += Field.numField1[i, j].ToString() + " ";
+                }
+            }
+            toWrite[4] = line;
+
+            line = "";
+
+            for (int i = 0; i < Field.xLenght; i++)
+            {
+                for (int j = 0; j < Field.yLenght; j++)
+                {
+                    line += Game.quessedWords[i, j];
+                }
+            }
+            toWrite[5] = line;
+
+            toWrite[6] = Game.playerName;
+            toWrite[7] = Game.numOfQuessedWords.ToString();
+
+            File.WriteAllLines(path, toWrite, Encoding.GetEncoding(1251));
+        }
+
+
+
+
+    }
     class Records
     {
         private static string path = Environment.CurrentDirectory + "/records.txt";
@@ -827,23 +1000,32 @@ namespace Меню
         {
             if (!File.Exists(path))
             {
-                File.Create(path);
+                using (var fileStream1 = new FileStream(path, FileMode.Create));
             }
-            
 
-            
-            
                 names.Clear();
                 points.Clear();
 
-                string str;
+            List<string> file = new List<string>();
+            string str;
+            string line;
+            using(var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var textReader = new StreamReader(fileStream,Encoding.GetEncoding(1251),false))
+            {
+                do
+                {
+                    line = textReader.ReadLine();
+                    if (line != null)
+                    {
+                        file.Add(line);
+                    }
+                } while (line != null);
+            }
 
-                string[] file = File.ReadAllLines(path, Encoding.GetEncoding(1251));
+            
 
-
-
-                int i = 0;
-            if (file.Length != 0)
+            int i = 0;
+            if (file.Count != 0)
             {
                 do
                 {
@@ -866,11 +1048,8 @@ namespace Меню
                     }
                     points.Add(point);
                     i++;
-                } while (i < file.Length);
-            }
-            
-            
-            
+                } while (i < file.Count);
+            } 
         }
 
         public static void ReadAndPrint()
@@ -993,9 +1172,10 @@ namespace Меню
                     {
                         case 0:
                             Game.NewGame();
+                            File.Delete(Environment.CurrentDirectory +"/records.txt");
                             break;
                         case 1:
-                            Console.WriteLine($"Тут оджнажды будет {menustrings[selectedLine]}");
+                            Continue.ContinueGame();
                             break;
                         case 2:
                             Records.ReadAndPrint();
