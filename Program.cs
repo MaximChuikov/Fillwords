@@ -893,7 +893,7 @@ namespace Меню
                 string[] words = file[2].Trim(' ').Split(' ');
 
                 string charField = file[3];
-                string[] numField = file[4].Split(' ');
+                string[] numField = file[4].Trim(' ').Split(' ');
                 string charQussedWords = file[5];
                 Game.playerName = file[6];
                 Game.numOfQuessedWords = Int32.Parse(file[7]);
@@ -903,17 +903,18 @@ namespace Меню
                 char[,] copyChar = new char[Field.xLenght, Field.yLenght];
                 for (int i = 0; i < charQussedWords.Length; i++)
                 {
-                    copyChar[i / Field.xLenght, i % Field.xLenght] = charField[i];
+                    copyChar[i % Field.xLenght, i / Field.xLenght] = charField[i];
                 }
                 Game.field = copyChar;
 
                 char[,] copyQuessed = new char[Field.xLenght, Field.yLenght];
                 for (int i = 0; i < charQussedWords.Length; i++)
                 {
-                    copyQuessed[i / Field.xLenght, i % Field.xLenght] = charQussedWords[i];
+                    copyQuessed[i % Field.xLenght, i / Field.xLenght] = charQussedWords[i];
                 }
                 Game.quessedWords = copyQuessed;
 
+                Field.fieldWords1.Clear();
                 for (int i = 0; i < words.Length; i++)
                 {
                     Field.fieldWords1.Add(words[i]);
@@ -922,7 +923,7 @@ namespace Меню
                 int[,] numArray = new int[Field.xLenght, Field.yLenght];
                 for (int i = 0; i < charQussedWords.Length; i++)
                 {
-                    numArray[i / Field.xLenght, i % Field.xLenght] = Int32.Parse(numField[i]);
+                    numArray[i % Field.xLenght, i / Field.xLenght] = Int32.Parse(numField[i]);
                 }
                 Field.numField1 = numArray;
 
@@ -935,7 +936,10 @@ namespace Меню
 
         public static void SaveGame()
         {
-            using (var fileStream1 = new FileStream(path, FileMode.Create));
+            using (var fileStream1 = new FileStream(path, FileMode.Create))
+            {
+
+            };
 
             string[] toWrite = new string[8];
 
@@ -952,33 +956,33 @@ namespace Меню
 
             line = "";
 
-            for (int i = 0; i < Field.xLenght; i++)
+            for (int i = 0; i < Field.yLenght; i++)
             {
-                for (int j = 0; j < Field.yLenght; j++)
+                for (int j = 0; j < Field.xLenght; j++)
                 {
-                    line += Game.field[i, j];
+                    line += Game.field[j, i];
                 }
             }
             toWrite[3] = line;
 
             line = "";
 
-            for (int i = 0; i < Field.xLenght; i++)
+            for (int i = 0; i < Field.yLenght; i++)
             {
-                for (int j = 0; j < Field.yLenght; j++)
+                for (int j = 0; j < Field.xLenght; j++)
                 {
-                    line += Field.numField1[i, j].ToString() + " ";
+                    line += Field.numField1[j, i].ToString() + " ";
                 }
             }
             toWrite[4] = line;
 
             line = "";
 
-            for (int i = 0; i < Field.xLenght; i++)
+            for (int i = 0; i < Field.yLenght; i++)
             {
-                for (int j = 0; j < Field.yLenght; j++)
+                for (int j = 0; j < Field.xLenght; j++)
                 {
-                    line += Game.quessedWords[i, j];
+                    line += Game.quessedWords[j, i];
                 }
             }
             toWrite[5] = line;
